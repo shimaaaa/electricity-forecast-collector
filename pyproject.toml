@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "electricity-forecast-collector"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^2.4.2"
+requests = "^2.31.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+select = ["F", "E", "W"]
+ignore = []
+
+line-length = 120
+
+target-version = "py310"
