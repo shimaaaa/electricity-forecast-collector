@@ -99,6 +99,7 @@ class AthenaSaver(Saver):
             DELETE FROM {self._database}.today_forecast
             WHERE TIMESTAMP '{target_date.isoformat()}' < datetime
             AND datetime <= TIMESTAMP '{target_date_p1.isoformat()}'
+            AND area = '{area.value}'
             """
         )
         value_query = [
@@ -117,7 +118,11 @@ class AthenaSaver(Saver):
             raise Exception("need database")
         tf = tomorrow_forecast
         self._execute(
-            query=f"DELETE FROM {self._database}.tomorrow_forecast WHERE date = date '{tf.date.isoformat()}'"
+            query=f"""
+            DELETE FROM {self._database}.tomorrow_forecast
+            WHERE date = date '{tf.date.isoformat()}'\
+            AND area = '{area.value}'
+            """
         )
 
         query = f"""

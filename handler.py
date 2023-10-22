@@ -1,13 +1,16 @@
 import logging
 
 from libs.constants.area import Area
-from libs.forecast_collector import collect_tokyo_forecast
+from libs.forecast_collector import collect_hokkaido_forecast, collect_tokyo_forecast
 from libs.forecast_saver import AthenaSaver
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-AREA_COLLECTOR_MAPPING = {Area.tokyo: collect_tokyo_forecast}
+AREA_COLLECTOR_MAPPING = {
+    Area.hokkaido: collect_hokkaido_forecast,
+    Area.tokyo: collect_tokyo_forecast,
+}
 
 
 def run(event, context):
