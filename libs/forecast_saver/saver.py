@@ -1,6 +1,7 @@
 import csv
 import time
 from abc import ABC, abstractmethod
+from datetime import timedelta
 from pathlib import Path
 
 import boto3
@@ -89,6 +90,17 @@ class AthenaSaver(Saver):
         return status["State"], exec_id
 
     def _output_today_forecasts(self, area: Area, today_forecasts: list[TodayForecast]):
+        if not today_forecasts:
+            return
+        target_date = today_forecasts[0].dt.date()
+        target_date_p1 = target_date + timedelta(days=1)
+        self._execute(
+            f"""
+            DELETE FROM {self._database}.today_forecast
+            WHERE TIMESTAMP '{target_date.isoformat()}' < datetime
+            AND datetime <= TIMESTAMP '{target_date_p1.isoformat()}'
+            """
+        )
         value_query = [
             f"(timestamp '{tf.dt:%Y-%m-%d %H:%M:%S}', {tf.actual_result}, {tf.forecast_demand}, {tf.forecast_supply}, '{area.value}')"
             for tf in today_forecasts
@@ -103,13 +115,16 @@ class AthenaSaver(Saver):
             return
         if self._database is None:
             raise Exception("need database")
-
         tf = tomorrow_forecast
+        self._execute(
+            query=f"DELETE FROM {self._database}.tomorrow_forecast WHERE date = date '{tf.date.isoformat()}'"
+        )
+
         query = f"""
         INSERT INTO {self._database}.tomorrow_forecast
         VALUES (
-            '{tf.date.isoformat()}', {tf.demand_peak_time}, {tf.demand_peak_supply}, {tf.demand_peak_demand},
-            {tf.usage_peak_time}, {tf.usage_peak_supply}, {tf.usage_peak_demand},
+            date '{tf.date.isoformat()}', '{tf.demand_peak_time}', {tf.demand_peak_supply}, {tf.demand_peak_demand},
+            '{tf.usage_peak_time}', {tf.usage_peak_supply}, {tf.usage_peak_demand},
             {tf.temperature}, '{area.value}'
         )
         """

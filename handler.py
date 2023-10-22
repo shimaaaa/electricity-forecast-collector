@@ -20,7 +20,6 @@ def run(event, context):
             logger.warning(f"{area.name} importer is not defined.")
             continue
         collected_data = collector()
-        print(saver)
         saver.run(structured_data=collected_data)
 
 
