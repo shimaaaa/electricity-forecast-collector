@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -42,4 +42,4 @@ class TomorrowForecast(BaseModel):
 class ForecastData(BaseModel):
     area: Area
     today_forecasts: List[TodayForecast]
-    tomorrow_forecast: TomorrowForecast
+    tomorrow_forecast: Optional[TomorrowForecast]

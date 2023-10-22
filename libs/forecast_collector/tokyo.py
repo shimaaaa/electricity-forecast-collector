@@ -73,53 +73,57 @@ class TomorrowForecastTransformer:
         reader = csv.DictReader(StringIO(raw_data), delimiter=",")
         for row in reader:
             return {k: row[v] for k, v in csv_mapper.items()}
-        raise Exception("data is not found")
+        raise ValueError("data is not found")
 
     def run(self):
-        # 需要ピーク時データ
-        demand_peak_supply = self._structuralize(
-            raw_data=self._extract(header=self.DEMAND_PEAK_SUPPLY_HEADER),
-            csv_mapper={
-                "demand_peak_time": "時間帯",
-                "demand_peak_supply": "翌日のピーク時供給力(万kW)",
-            },
-        )
-        demand_peak_demand = self._structuralize(
-            raw_data=self._extract(header=self.DEMAND_PEAK_DEMAND_HEADER),
-            csv_mapper={
-                "demand_peak_demand": "翌日の予想最大電力(万kW)",
-            },
-        )
-        # 使用率ピーク時データ
-        usage_peak_supply = self._structuralize(
-            raw_data=self._extract(header=self.USAGE_PEAK_SUPPLY_HEADER),
-            csv_mapper={
-                "usage_peak_time": "時間帯",
-                "usage_peak_supply": "翌日の使用率ピーク時供給力(万kW)",
-            },
-        )
-        usage_peak_demand = self._structuralize(
-            raw_data=self._extract(header=self.USAGE_PEAK_DEMAND_HEADER),
-            csv_mapper={
-                "usage_peak_demand": "翌日の使用率ピーク時予想最大電力(万kW)",
-            },
-        )
-        # 気温
-        temperature = self._structuralize(
-            raw_data=self._extract(header=self.TEMPERATURE_HEADER),
-            csv_mapper={
-                "temperature": "翌日の想定気温",
-            },
-        )
-        data = {
-            "date": date.today() + timedelta(days=1),
-            **demand_peak_supply,
-            **demand_peak_demand,
-            **usage_peak_supply,
-            **usage_peak_demand,
-            **temperature,
-        }
-        return TomorrowForecast(**data)
+        try:
+            # 需要ピーク時データ
+            demand_peak_supply = self._structuralize(
+                raw_data=self._extract(header=self.DEMAND_PEAK_SUPPLY_HEADER),
+                csv_mapper={
+                    "demand_peak_time": "時間帯",
+                    "demand_peak_supply": "翌日のピーク時供給力(万kW)",
+                },
+            )
+            demand_peak_demand = self._structuralize(
+                raw_data=self._extract(header=self.DEMAND_PEAK_DEMAND_HEADER),
+                csv_mapper={
+                    "demand_peak_demand": "翌日の予想最大電力(万kW)",
+                },
+            )
+            # 使用率ピーク時データ
+            usage_peak_supply = self._structuralize(
+                raw_data=self._extract(header=self.USAGE_PEAK_SUPPLY_HEADER),
+                csv_mapper={
+                    "usage_peak_time": "時間帯",
+                    "usage_peak_supply": "翌日の使用率ピーク時供給力(万kW)",
+                },
+            )
+            usage_peak_demand = self._structuralize(
+                raw_data=self._extract(header=self.USAGE_PEAK_DEMAND_HEADER),
+                csv_mapper={
+                    "usage_peak_demand": "翌日の使用率ピーク時予想最大電力(万kW)",
+                },
+            )
+            # 気温
+            temperature = self._structuralize(
+                raw_data=self._extract(header=self.TEMPERATURE_HEADER),
+                csv_mapper={
+                    "temperature": "翌日の想定気温",
+                },
+            )
+            data = {
+                "date": date.today() + timedelta(days=1),
+                **demand_peak_supply,
+                **demand_peak_demand,
+                **usage_peak_supply,
+                **usage_peak_demand,
+                **temperature,
+            }
+            return TomorrowForecast(**data)
+        except ValueError:
+            # 18時以降じゃないとデータが出てこない
+            return None
 
 
 class TokyoDataTransformer(DataTransformer):
